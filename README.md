@@ -1,3 +1,11 @@
+<!--
+ * @Author: your name
+ * @Date: 2020-11-15 16:37:17
+ * @LastEditTime: 2020-11-15 17:27:37
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /RoboRTS_BehaviorTree/README.md
+-->
 # WestWorld行为树项目
 
 ![westworld](/assets/westworld.jpeg)
@@ -44,7 +52,7 @@ RoboRTS虽然提供了一些行为节点类的定义，但是没有给出一个�
 
 ## 行为树结构与事件顺序
 
-![nodes](/assets/nodes_ph5b9cndy.png)
+![nodes](/assets/nodes.png)
 
 + **frame0**: 从Home前往Mine 
 + **frame1**: 到达Mine
@@ -63,4 +71,4 @@ RoboRTS虽然提供了一些行为节点类的定义，但是没有给出一个�
 
 
 ## 节点UML图
-![uml](/assets/uml_wfb0f53im.png)
+![uml](/assets/uml.png)
