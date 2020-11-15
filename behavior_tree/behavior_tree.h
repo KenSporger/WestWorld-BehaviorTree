@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2020-11-15 09:38:34
+ * @LastEditTime: 2020-11-15 17:19:34
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /RoboRTS_BehaviorTree/behavior_tree/behavior_tree.h
+ */
 #ifndef BEHAVIOR_TREE_H
 #define BEHAVIOR_TREE_H
 
@@ -16,7 +24,7 @@ public:
     void Run()
     {
         
-        while(blackboard_->frame < 20)
+        while(blackboard_->frame <= 12)
         {
             std::cout << "---------------frame "+std::to_string(blackboard_->frame)
                         +"---------------" << std::endl;
