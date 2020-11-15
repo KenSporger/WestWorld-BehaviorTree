@@ -1,0 +1,192 @@
+@startuml
+
+enum BehaviorState
+{
+   RUNNING
+   SUCCESS 
+   FAILURE 
+   IDLE
+}
+
+enum BehaviorType
+{
+    PARALLEL
+    SELECTOR
+    SEQUENCE
+    ACTION
+    PRECONDITION
+}
+
+enum AbortType
+{
+    NONE 
+    SELF 
+    LOW_PRIORITY 
+    BOTH
+}
+
+class BehaviorTree
+{
+    ' 行为树根节点
+    -root_node_ : BehaviorNode::Ptr
+    ' 树单次遍历时间
+    -cycle_duration_ : milliseconds
+    +BehaviorTree(root_node, cycle_duration)
+    +Run()
+}
+note left of BehaviorTree
+控制树的遍历执行
+root_node_->Run()
+endnote
+
+
+abstract class BehaviorNode
+{
+    #name_ : string
+    #behavior_state_ : BehaviorState
+    #behavior_type_ : BehaviorType
+    #blackboard_ptr_ : Blackboard::Ptr
+    #parent_node_ptr_ : BehaviorNode::Ptr
+    #level_ : uint
+
+    +BehaviorNode(name, BehaviorType, blackboard_ptr)
+    +Run() ： BehaviorState
+    +{abstract} Reset()
+
+    #{abstract} Update() : BehaviorState
+    #{abstract} OnInitialize()
+    #{abstract} OnTerminate(BehaviorState)
+}
+
+note left of BehaviorNode
+BehaviorState Run(){
+
+    if (behavior_state_ != BehaviorState::RUNNING) {
+      OnInitialize();
+    }
+
+    behavior_state_ = Update();
+
+    if (behavior_state_ != BehaviorState::RUNNING) {
+      OnTerminate(behavior_state_);
+    }
+
+    return behavior_state_;
+  }
+endnote
+
+abstract class ActionNode
+{
+    #{abstract} Update() : BehaviorState
+    #{abstract} OnInitialize()
+    #{abstract} OnTerminate(BehaviorState)
+}
+
+BehaviorNode <|-- ActionNode
+
+abstract class DecoratorNode
+{
+    #child_node_ptr_ : BehaviorNode::Ptr
+
+    +{abstract}GetChild() : BehaviorNode::Ptr
+    +SetChild(BehaviorNode::Ptr child_node_ptr)
+
+    #{abstract} OnInitialize()
+    #{abstract} Update() : BehaviorState
+    #{abstract} OnTerminate(BehaviorState)
+}
+
+BehaviorNode <|-- DecoratorNode
+
+
+abstract PreconditionNode
+{
+    #abort_type_ : AbortType
+    #precondition_function_ : bool_function
+
+    #{abstract} OnInitialize()
+    #{abstract} Update() : BehaviorState
+    #{abstract} OnTerminate(BehaviorState)
+    #{abstract} Precondition() ： bool
+    #{abstract} Reevaluation() ： bool
+}
+
+note left of PreconditionNode
+virtual BehaviorState Update(){
+    if(child_node_ptr_ == nullptr){
+      return BehaviorState::SUCCESS;
+    }
+    if(Reevaluation()){
+      BehaviorState state = child_node_ptr_->Run();
+      return state;
+    }
+    return BehaviorState::FAILURE;
+  }
+endnote 
+
+DecoratorNode <|-- PreconditionNode
+
+abstract CompositeNode
+{
+    #children_node_ptr_ : vector<BehaviorNode::Ptr>
+    #children_node_index_ : uint
+    +{abstract} AddChildren(BehaviorNode::Ptr)
+    +{abstract} AddChildren(initializer_list<BehaviorNode::Ptr>)
+
+    #{abstract} OnInitialize()
+    #{abstract} Update() : BehaviorState
+    #{abstract} OnTerminate(BehaviorState)
+}
+
+BehaviorNode <|-- CompositeNode
+
+abstract SelectorNode
+{
+    #children_node_reevaluation_ : vector<bool>
+
+    +{abstract} AddChildren(BehaviorNode::Ptr)
+    +{abstract} AddChildren(initializer_list<BehaviorNode::Ptr>)
+
+    #{abstract} OnInitialize()
+    #{abstract} Update() : BehaviorState
+    #{abstract} OnTerminate(BehaviorState)
+}
+CompositeNode <|-- SelectorNode
+
+abstract SequenceNode 
+{
+    #{abstract} OnInitialize()
+    #{abstract} Update() : BehaviorState
+    #{abstract} OnTerminate(BehaviorState)  
+}
+note bottom of SequenceNode
+while(true){
+      BehaviorState state = children_node_ptr_.at(children_node_index_)->Run();
+      if (state != BehaviorState::SUCCESS) {
+        return state;
+      }
+      if (++children_node_index_ == children_node_ptr_.size()) {
+        children_node_index_ = 0;
+        return BehaviorState::SUCCESS;
+      }
+    }
+endnote
+CompositeNode <|-- SequenceNode
+
+abstract ParallelNode 
+{
+    #children_node_done_ : vector<bool>
+    #success_count_ : uint
+    #failure_count_ : uint
+    #threshold_ : uint
+
+    #{abstract} OnInitialize()
+    #{abstract} Update() : BehaviorState
+    #{abstract} OnTerminate(BehaviorState)  
+}
+CompositeNode <|-- ParallelNode
+
+
+
+
+@enduml

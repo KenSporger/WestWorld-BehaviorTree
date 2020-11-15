@@ -1,0 +1,20 @@
+@startmindmap
+
+*[#Orange] position_selector
+**[#lightgreen] is_schoolover_condition
+***[#FFBBCC] school_sequence
+****[#lightblue] go_school_action
+****[#lightblue] go_home_from_school_action
+**[#lightgreen] is_mine_condition
+***[#Orange] mine_selector
+****[#lightgreen] is_rich_or_energy_low_condition
+*****[#lightblue] go_home_from_mine_action
+****[#lightblue] minning_action
+**[#Orange] home_selector
+***[#lightgreen] is_energy_low_condition
+**** home_parallel
+*****[#lightblue] heat_water_action
+*****[#lightblue] rest_action
+***[#lightblue] go_mine_from_home_action
+
+@endmindmap
